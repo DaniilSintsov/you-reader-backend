@@ -1,49 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { GetUserArgs } from './dto/args/get-user';
-import { GetUsersArgs } from './dto/args/get-users';
-import { DeleteUserInput } from './dto/input/delete-user';
-import { UpdateUserInput } from './dto/input/update-user';
-import { UserModel } from './models/user';
-import { SignupInput } from 'src/auth/dto/input/signup';
+import { User, UserDocument } from './models/user.model';
+import { SignupInput } from 'src/auth/dto/input/signup.input';
+import { InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
 
 @Injectable()
 export class UserService {
-	private users: UserModel[] = [];
+	constructor(
+		@InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+	) {}
 
-	public createUser(createUserData: SignupInput): UserModel {
-		const user: UserModel = {
-			id: uuidv4(),
-			...createUserData,
-		};
-		this.users.push(user);
-		return user;
+	async createUser(createUserData: SignupInput): Promise<User> {
+		const newUser = new this.userModel(createUserData);
+		return await newUser.save();
 	}
 
-	public updateUser(updateUserData: UpdateUserInput): UserModel {
-		const user = this.users.find((user) => user.id === updateUserData.id);
-		Object.assign(user, updateUserData);
-		return user;
+	async findById(id: mongoose.Schema.Types.ObjectId): Promise<User> {
+		return await this.userModel.findById(id);
 	}
 
-	public getUser(getUserArgs: GetUserArgs): UserModel {
-		return this.users.find((user) => user.id === getUserArgs.id);
-	}
-
-	public getUserByEmail(email: string): UserModel | undefined {
-		return this.users.find((user) => user.email === email);
-	}
-
-	public getUsers(getUsersArgs: GetUsersArgs): UserModel[] {
-		return getUsersArgs.ids.map((id) => this.getUser({ id }));
-	}
-
-	public deleteUser(deleteUserData: DeleteUserInput): UserModel {
-		const userIndex = this.users.findIndex(
-			(user) => user.id === deleteUserData.id,
-		);
-		const user = this.users[userIndex];
-		this.users.splice(userIndex);
-		return user;
+	async getUserByEmail(email: string): Promise<User> {
+		return await this.userModel.findOne({ email });
 	}
 }

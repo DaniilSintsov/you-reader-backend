@@ -3,10 +3,15 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { TokenModule } from './token/token.module';
 
 @Module({
 	imports: [
+		UserModule,
+		AuthModule,
+		TokenModule,
 		GraphQLModule.forRoot<ApolloDriverConfig>({
 			driver: ApolloDriver,
 			context: (context) => context,
@@ -15,8 +20,13 @@ import { ConfigModule } from '@nestjs/config';
 		ConfigModule.forRoot({
 			isGlobal: true,
 		}),
-		UserModule,
-		AuthModule,
+		MongooseModule.forRootAsync({
+			imports: [ConfigModule],
+			inject: [ConfigService],
+			useFactory: async (configService: ConfigService) => ({
+				uri: configService.get('MONGO_URI'),
+			}),
+		}),
 	],
 })
 export class AppModule {}
