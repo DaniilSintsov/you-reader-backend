@@ -1,21 +1,13 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { LoginInput } from './dto/input/login.input';
 import { AuthService } from './auth.service';
 import { SignupInput } from './dto/input/signup.input';
 import { Request, Response } from 'express';
 import { User } from 'src/user/models/user.model';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from './guards/auth.guard';
 
 @Resolver(() => User)
 export class AuthResolver {
 	constructor(private readonly authService: AuthService) {}
-
-	@UseGuards(AuthGuard)
-	@Query(() => String)
-	sayHello(): string {
-		return 'Hello World!';
-	}
 
 	@Mutation(() => User)
 	async signup(

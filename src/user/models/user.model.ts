@@ -21,10 +21,10 @@ export class User extends Document {
 	@Prop({ required: true })
 	password: string;
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	refreshToken: string;
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	accessToken: string;
 }
 
