@@ -6,6 +6,9 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TokenModule } from './token/token.module';
+import { BookModule } from './book/book.module';
+import { ReaderModule } from './reader/reader.module';
+import { S3ClientModule } from './s3-client/s3-client.module';
 
 @Module({
 	imports: [
@@ -27,6 +30,9 @@ import { TokenModule } from './token/token.module';
 				uri: configService.get('MONGO_URI'),
 			}),
 		}),
+		BookModule,
+		ReaderModule,
+		S3ClientModule,
 	],
 })
 export class AppModule {}
