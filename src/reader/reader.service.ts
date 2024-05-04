@@ -15,6 +15,13 @@ export class ReaderService {
 		private readonly bookService: BookService,
 	) {}
 
+	async deleteFile(bookId: mongoose.Schema.Types.ObjectId): Promise<Book> {
+		const book = await this.bookService.deleteBook(bookId);
+		await this.s3Client.deleteFile(book.file);
+		await this.s3Client.deleteFile(book.cover);
+		return book;
+	}
+
 	async uploadFile(
 		buffer: Buffer,
 		file: FileUpload,
@@ -35,11 +42,13 @@ export class ReaderService {
 
 			const coverLocation = await this.s3Client.uploadFile(
 				imgBuffer,
-				`${bookId}-${userId}.png`,
+				`${bookId}.png`,
+				String(userId),
 			);
 			const fileLocation = await this.s3Client.uploadFile(
 				buffer,
-				`${bookId}-${userId}.pdf`,
+				`${bookId}.pdf`,
+				String(userId),
 			);
 
 			return await this.bookService.createBook({

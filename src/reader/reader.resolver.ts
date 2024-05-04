@@ -6,6 +6,7 @@ import { ReaderService } from './reader.service';
 import { Request } from 'express';
 import { ITokenPayload } from 'src/shared/types';
 import { Book } from 'src/book/models/book.model';
+import mongoose from 'mongoose';
 
 @Resolver()
 export class ReaderResolver {
@@ -49,6 +50,19 @@ export class ReaderResolver {
 				file,
 				(request['user'] as ITokenPayload).userId,
 			);
+		} catch (error) {
+			throw new Error(error);
+		}
+	}
+
+	@UseGuards(AuthGuard)
+	@Mutation(() => Book)
+	async deleteFile(
+		@Args('bookId', { type: () => String })
+		bookId: mongoose.Schema.Types.ObjectId,
+	): Promise<Book> {
+		try {
+			return this.readerService.deleteFile(bookId);
 		} catch (error) {
 			throw new Error(error);
 		}
