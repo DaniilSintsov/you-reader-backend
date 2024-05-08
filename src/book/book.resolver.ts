@@ -2,40 +2,47 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Book } from './models/book.model';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { BookService } from './book.service';
-import { ITokenPayload } from 'src/shared/types';
+import { ITokenPayload } from 'src/shared/types/common-types';
 import { PaginationArgs } from './dto/args/pagination.args';
 import mongoose from 'mongoose';
+import { BooksWithTotalCount } from './dto/books-with-total-count.dto';
 
 @Resolver(() => Book)
 export class BookResolver {
 	constructor(private readonly bookService: BookService) {}
 
 	@UseGuards(AuthGuard)
-	@Query(() => [Book])
+	@Query(() => BooksWithTotalCount)
 	async getAllBooks(
 		@Args() paginationArgs: PaginationArgs,
 		@Context('req') request: Request,
-	): Promise<Book[] | []> {
-		return await this.bookService.getAllBooksOfCurrentUser(
+		@Context('res') response: Response,
+	): Promise<BooksWithTotalCount> {
+		const data = await this.bookService.getAllBooksOfCurrentUser(
 			(request['user'] as ITokenPayload).userId,
 			paginationArgs?.offset,
 			paginationArgs?.limit,
 		);
+		response.cookie('x-total-count', data.totalCount.toString());
+		return data;
 	}
 
 	@UseGuards(AuthGuard)
-	@Query(() => [Book])
+	@Query(() => BooksWithTotalCount)
 	async getAllFavoriteBooks(
 		@Args() paginationArgs: PaginationArgs,
 		@Context('req') request: Request,
-	): Promise<Book[] | []> {
-		return await this.bookService.getAllFavoriteBooksOfCurrentUser(
+		@Context('res') response: Response,
+	): Promise<BooksWithTotalCount> {
+		const data = await this.bookService.getAllFavoriteBooksOfCurrentUser(
 			(request['user'] as ITokenPayload).userId,
 			paginationArgs?.offset,
 			paginationArgs?.limit,
 		);
+		response.cookie('x-total-count', data.totalCount.toString());
+		return data;
 	}
 
 	@UseGuards(AuthGuard)

@@ -4,7 +4,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { ReaderService } from './reader.service';
 import { Request } from 'express';
-import { ITokenPayload } from 'src/shared/types';
+import { ITokenPayload } from 'src/shared/types/common-types';
 import { Book } from 'src/book/models/book.model';
 import mongoose from 'mongoose';
 
