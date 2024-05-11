@@ -45,6 +45,21 @@ export class BookService {
 		return { totalCount, data: await books };
 	}
 
+	async getBook(bookId: mongoose.Schema.Types.ObjectId): Promise<Book> {
+		return await this.bookModel.findOne({ _id: bookId });
+	}
+
+	async setCurrentPage(
+		bookId: mongoose.Schema.Types.ObjectId,
+		pageNumber: number,
+	): Promise<Book> {
+		return await this.bookModel.findOneAndUpdate(
+			{ _id: bookId },
+			{ $set: { currentPage: pageNumber } },
+			{ new: true },
+		);
+	}
+
 	async setIsFavorite(
 		bookId: mongoose.Schema.Types.ObjectId,
 		isFavorite: boolean,

@@ -1,4 +1,4 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Book } from './models/book.model';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -46,6 +46,15 @@ export class BookResolver {
 	}
 
 	@UseGuards(AuthGuard)
+	@Query(() => Book, { nullable: true })
+	async getBook(
+		@Args('bookId', { type: () => String })
+		bookId: mongoose.Schema.Types.ObjectId,
+	): Promise<Book> {
+		return await this.bookService.getBook(bookId);
+	}
+
+	@UseGuards(AuthGuard)
 	@Mutation(() => Book)
 	async setIsFavorite(
 		@Args('bookId', { type: () => String })
@@ -54,5 +63,15 @@ export class BookResolver {
 		isFavorite: boolean,
 	): Promise<Book> {
 		return await this.bookService.setIsFavorite(bookId, isFavorite);
+	}
+
+	@UseGuards(AuthGuard)
+	@Mutation(() => Book)
+	async setCurrentPage(
+		@Args('bookId', { type: () => String })
+		bookId: mongoose.Schema.Types.ObjectId,
+		@Args('pageNumber', { type: () => Int }) pageNumber: number,
+	): Promise<Book> {
+		return await this.bookService.setCurrentPage(bookId, pageNumber);
 	}
 }
