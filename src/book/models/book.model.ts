@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, HydratedDocument } from 'mongoose';
 import { User } from 'src/user/models/user.model';
@@ -41,6 +41,10 @@ export class Book extends Document {
 	@Field(() => Int)
 	@Prop({ required: true })
 	currentPage: number;
+
+	@Field(() => Float, { nullable: true })
+	@Prop({ required: true })
+	heightToWidthRatio: number;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);

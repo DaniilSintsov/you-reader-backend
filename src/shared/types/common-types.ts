@@ -15,4 +15,5 @@ export interface ICreateBookData {
 	isFavorite: boolean;
 	pagesCount: number;
 	currentPage: number;
+	heightToWidthRatio: number;
 }

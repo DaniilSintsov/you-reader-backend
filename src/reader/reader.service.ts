@@ -36,6 +36,17 @@ export class ReaderService {
 				pdfDoc,
 				file.filename,
 			);
+
+			const pagesCount = pdfDoc.numPages;
+			const pages: pdfjsLib.PDFPageProxy[] = await Promise.all(
+				Array.from({ length: pagesCount }).map((_, i) =>
+					pdfDoc.getPage(i + 1),
+				),
+			);
+
+			const mostFrequentHeightToWidthRatio =
+				this.getMostFrequentHeightToWidthRatio(pages);
+
 			const imgBuffer = await this.getImgBuffer(pdfDoc);
 
 			const bookId: Types.ObjectId = new Types.ObjectId();
@@ -59,12 +70,34 @@ export class ReaderService {
 				cover: coverLocation,
 				file: fileLocation,
 				isFavorite: false,
-				pagesCount: pdfDoc.numPages,
+				pagesCount: pagesCount,
+				heightToWidthRatio: mostFrequentHeightToWidthRatio,
 				currentPage: 1,
 			});
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	private getMostFrequentHeightToWidthRatio(
+		pages: pdfjsLib.PDFPageProxy[],
+	): number {
+		const mapRatios = new Map<number, number>();
+		let mostFrequentRatio = 1;
+		let mostFrequentRatioTotal = 0;
+		pages.map((page) => {
+			const [x, y, w, h] = page.view;
+			const width = w - x;
+			const height = h - y;
+			const ratio = height / width;
+			const ratioTotal = (mapRatios.get(ratio) || 0) + 1;
+			mapRatios.set(ratio, ratioTotal);
+			if (ratioTotal > mostFrequentRatioTotal) {
+				mostFrequentRatio = ratio;
+				mostFrequentRatioTotal = ratioTotal;
+			}
+		});
+		return mostFrequentRatio;
 	}
 
 	private async getMetadata(
